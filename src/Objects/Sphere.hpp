@@ -2,21 +2,23 @@
 #define RT_SPHEREH
 
 #include <hittable.hpp>
+#include <memory>
 
 class Sphere : public Hittable {
 public:
-    Sphere(const point3& center, float rad)
+    Sphere(const point3& center, float rad, std::shared_ptr<Material> mat)
     {
         m_Center = center;
         m_Radius = rad;
+        m_Material = mat;
     };
 
-    bool hit(const Ray& ray, float stepMin, float stepMax, HitResponse& response) const override
+    bool hit(const Ray& ray, Interval rayStep, HitResponse& response) const override
     {
-        vec3 oc = m_Center - ray.origin();
-        float a = ray.dir().magnitude_squared();
+        Vec3 oc = m_Center - ray.origin();
+        float a = ray.dir().magnitudeSquared();
         float h = dot(ray.dir(), oc);
-        float c = oc.magnitude_squared() - m_Radius * m_Radius;
+        float c = oc.magnitudeSquared() - m_Radius * m_Radius;
         float disc = h * h - a * c;
 
         if (disc < 0) {
@@ -27,17 +29,18 @@ public:
 
         // Finding which intersection is the closest, based on the quadratic formula
         float root = (h - rootDisc) / a;
-        if (root <= stepMin || stepMax <= root) {
+        if (!rayStep.surrounds(root)) {
             root = (h + rootDisc) / a;
-            if (root <= stepMin || stepMax <= root) {
+            if (!rayStep.surrounds(root)) {
                 return false;
             }
         }
 
         response.step = root;
         response.point = ray.at(response.step);
-        vec3 outNorm = (response.point - m_Center) / m_Radius;
+        Vec3 outNorm = (response.point - m_Center) / m_Radius;
         response.setFaceNormal(ray, outNorm);
+        response.material = m_Material;
 
         return true;
     }
@@ -45,5 +48,7 @@ public:
 private:
     point3 m_Center;
     float m_Radius;
+
+    std::shared_ptr<Material> m_Material;
 };
 #endif

@@ -1,28 +1,30 @@
-#include <color.hpp>
-#include <iostream>
-#include <vec3.hpp>
+#include <core.hpp>
 
-struct Image {
-    int Width = 256;
-    int Height = 256;
-};
+#include <Objects/Sphere.hpp>
+#include <camera.hpp>
+#include <hittableList.hpp>
+
+#include <material.hpp>
+#include <memory>
 
 int main()
 {
+    std::shared_ptr<Material> materialGround = std::make_shared<Lambertian>(color(0.8, 0.8, 0.0));
+    std::shared_ptr<Material> materialCenter = std::make_shared<Lambertian>(color(0.8, 0.8, 0.8));
+    std::shared_ptr<Material> materialLeft = std::make_shared<Metal>(color(0.9, 0.2, 0.2));
+    std::shared_ptr<Material> materialRight = std::make_shared<Metal>(color(0.2, 0.2, 0.8));
 
-    Image image;
+    int imageWidth = 2560;
+    int maxDepth = 50;
+    int samplesPerPixel = 10;
 
-    std::cout << "P3\n"
-              << image.Width << ' ' << image.Height << "\n255\n";
+    Camera camera(point3(0, 0, 0), imageWidth, (16.0f / 9.0f), 1.0f, samplesPerPixel, maxDepth);
 
-    for (int j = 0; j < image.Height; j++) {
-        std::clog << "\rScanlines remaining: " << (image.Height - j) << ' ' << std::flush;
-        for (int i = 0; i < image.Width; i++) {
-            color c = color { float(i) / (image.Width - 1), float(j) / (image.Height - 1), 0.0 };
-            Color::writeColor(std::cout, c);
-        }
-    }
-    std::clog << "\rDone.                 \n";
+    HittableList world;
+    world.add(std::make_shared<Sphere>(point3(0.0, -100.5, -1.0), 100.0, materialGround));
+    world.add(std::make_shared<Sphere>(point3(0.0, 0.0, -1.2), 0.5, materialCenter));
+    world.add(std::make_shared<Sphere>(point3(-1.0, 0.0, -1.0), 0.5, materialLeft));
+    world.add(std::make_shared<Sphere>(point3(1.0, 0.0, -1.0), 0.5, materialRight));
 
-    return 0;
+    camera.render(world);
 }

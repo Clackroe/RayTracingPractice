@@ -2,12 +2,12 @@
 #define RT_VEC3H
 #include <cmath>
 #include <iostream>
-class vec3 {
+class Vec3 {
 
 public:
-    vec3() { }
+    Vec3() { }
 
-    vec3(float a, float b, float c)
+    Vec3(float a, float b, float c)
     {
         data[0] = a;
         data[1] = b;
@@ -20,7 +20,7 @@ public:
     float getY() const { return data[1]; }
     float getZ() const { return data[2]; }
 
-    vec3& operator*=(float scalar)
+    Vec3& operator*=(float scalar)
     {
         data[0] *= scalar;
         data[1] *= scalar;
@@ -28,7 +28,7 @@ public:
         return *this;
     }
 
-    vec3& operator+=(const vec3& other)
+    Vec3& operator+=(const Vec3& other)
     {
         data[0] += other.data[0];
         data[1] += other.data[1];
@@ -36,76 +36,119 @@ public:
         return *this;
     }
 
-    vec3& operator/=(float div)
+    Vec3& operator/=(float div)
     {
         return *this *= 1 / div;
     }
 
-    float magnitude_squared() const
+    float magnitudeSquared() const
     {
         return (data[0] * data[0]) + (data[1] * data[1]) + (data[2] * data[2]);
     }
     float magnitude() const
     {
-        return std::sqrt(magnitude_squared());
+        return std::sqrt(magnitudeSquared());
     }
+
+    bool nearZero() const
+    {
+        float s = 1e-8;
+        return (std::fabs(data[0]) < s) && (std::fabs(data[1]) < s) && (std::fabs(data[2]) < s);
+    }
+
+    static Vec3 random();
+
+    static Vec3 random(float min, float max);
 };
 
 // For more readable code
-using point3 = vec3;
+using point3 = Vec3;
 
-inline std::ostream& operator<<(std::ostream& out, const vec3& v)
+inline std::ostream& operator<<(std::ostream& out, const Vec3& v)
 {
     return out << v.data[0] << ' ' << v.data[1] << ' ' << v.data[2];
 }
 
-inline vec3 operator+(const vec3& u, const vec3& v)
+inline Vec3 operator+(const Vec3& u, const Vec3& v)
 {
-    return vec3({ u.data[0] + v.data[0], u.data[1] + v.data[1], u.data[2] + v.data[2] });
+    return Vec3({ u.data[0] + v.data[0], u.data[1] + v.data[1], u.data[2] + v.data[2] });
 }
 
-inline vec3 operator-(const vec3& u, const vec3& v)
+inline Vec3 operator-(const Vec3& u, const Vec3& v)
 {
-    return vec3({ u.data[0] - v.data[0], u.data[1] - v.data[1], u.data[2] - v.data[2] });
+    return Vec3({ u.data[0] - v.data[0], u.data[1] - v.data[1], u.data[2] - v.data[2] });
 }
 
-inline vec3 operator*(const vec3& u, const vec3& v)
+inline Vec3 operator*(const Vec3& u, const Vec3& v)
 {
-    return vec3({ u.data[0] * v.data[0], u.data[1] * v.data[1], u.data[2] * v.data[2] });
+    return Vec3({ u.data[0] * v.data[0], u.data[1] * v.data[1], u.data[2] * v.data[2] });
 }
 
-inline vec3 operator*(float t, const vec3& v)
+inline Vec3 operator*(float t, const Vec3& v)
 {
-    return vec3({ t * v.data[0], t * v.data[1], t * v.data[2] });
+    return Vec3({ t * v.data[0], t * v.data[1], t * v.data[2] });
 }
 
-inline vec3 operator*(const vec3& v, float t)
+inline Vec3 operator*(const Vec3& v, float t)
 {
     return t * v;
 }
 
-inline vec3 operator/(const vec3& v, float t)
+inline Vec3 operator/(const Vec3& v, float t)
 {
     return (1 / t) * v;
 }
 
-inline float dot(const vec3& u, const vec3& v)
+inline float dot(const Vec3& u, const Vec3& v)
 {
     return u.data[0] * v.data[0]
         + u.data[1] * v.data[1]
         + u.data[2] * v.data[2];
 }
 
-inline vec3 cross(const vec3& u, const vec3& v)
+inline Vec3 cross(const Vec3& u, const Vec3& v)
 {
-    return vec3({ u.data[1] * v.data[2] - u.data[2] * v.data[1],
+    return Vec3({ u.data[1] * v.data[2] - u.data[2] * v.data[1],
         u.data[2] * v.data[0] - u.data[0] * v.data[2],
         u.data[0] * v.data[1] - u.data[1] * v.data[0] });
 }
 
-inline vec3 unit_vector(const vec3& v)
+inline Vec3 unitVector(const Vec3& v)
 {
     return v / v.magnitude();
+}
+
+inline Vec3 randomInUnitSphere()
+{
+    while (true) {
+        Vec3 v = Vec3::random(-1, 1);
+        if (v.magnitude() < 1) {
+            return v;
+        }
+    }
+}
+
+inline Vec3 randomUnitVector()
+{
+    return unitVector(randomInUnitSphere());
+}
+
+inline Vec3 randomInHemisphere(const Vec3& normal)
+{
+    Vec3 v = randomUnitVector();
+    if (dot(v, normal) > 0.0f) {
+        return v;
+    } else {
+        return -1 * v;
+    }
+}
+
+inline Vec3 reflect(const Vec3& v, const Vec3& n)
+{
+    float a = dot(v, n);
+    Vec3 b = a * n;
+
+    return v - (2 * b);
 }
 
 #endif

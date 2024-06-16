@@ -5,16 +5,16 @@
 class Ray {
 public:
     Ray();
-    Ray(const vec3& origin, const vec3& dir);
+    Ray(const Vec3& origin, const Vec3& dir);
 
     const point3& origin() const;
-    const vec3& dir() const;
+    const Vec3& dir() const;
 
     point3 at(float stepT) const;
 
 private:
     point3 m_Origin;
-    vec3 m_Direction;
+    Vec3 m_Direction;
 };
 
 #endif
