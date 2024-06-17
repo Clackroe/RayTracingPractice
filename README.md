@@ -11,3 +11,8 @@ Some places where I changed the architecture:
 This project uses CMake, build as usual. (Written and tested on Linux, other platforms are not garunteed)
 
 Here are the results of the final renderer, enjoy!
+
+1200x675 | 
+Max Depth: 50 |
+Samples Per Pixel: 500
+![image](https://github.com/Clackroe/RayTracingPractice/assets/65436489/5d537986-c030-4d5b-be0f-bb5b3fb6f06a)
