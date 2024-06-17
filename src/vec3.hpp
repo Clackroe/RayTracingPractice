@@ -143,12 +143,22 @@ inline Vec3 randomInHemisphere(const Vec3& normal)
     }
 }
 
+extern Vec3 randomInUnitDisc();
+
 inline Vec3 reflect(const Vec3& v, const Vec3& n)
 {
     float a = dot(v, n);
     Vec3 b = a * n;
 
     return v - (2 * b);
+}
+
+inline Vec3 refract(const Vec3 uv, const Vec3& n, float etaiOverEtat)
+{
+    float cosTheta = std::fmin(dot(-1 * uv, n), 1.0f);
+    Vec3 rPerp = etaiOverEtat * (uv + cosTheta * n);
+    Vec3 rParallel = -1 * std::sqrt(std::fabs(1.0f - rPerp.magnitudeSquared())) * n;
+    return rPerp + rParallel;
 }
 
 #endif
